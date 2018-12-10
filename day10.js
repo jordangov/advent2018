@@ -37,6 +37,7 @@ points.forEach(function(point) {
 let minArea = 99999;
 let holdInfo = null;
 let holdMap = null;
+let time = 0;
 while(true) {
   points.forEach(function(point) {
     if (map[point.location[1]][point.location[0]] === point) {
@@ -58,8 +59,10 @@ while(true) {
   if (holdInfo && info.area > minArea) {
     break;
   }
+  time++;
 }
 console.log('FINAL:', holdInfo);
+console.log('TIME:', time);
 console.log(holdMap);
 
 

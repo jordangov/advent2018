@@ -1,11 +1,12 @@
 
 const real = 1;
 const serial = Number(require('./day11-data')[real]);
+const gridSize = 300;
 
 const grid = [];
-for (let i=0; i<300; i++) {
+for (let i=0; i<gridSize; i++) {
   grid.push([]);
-  for (let j=0; j<300; j++) {
+  for (let j=0; j<gridSize; j++) {
     let power = ('' + (((((j+1) + 10) * (i+1)) + serial) * ((j+1) + 10)));
     if (power.length > 2) {
       power = Number(power.split('').reverse()[2]);
@@ -20,20 +21,25 @@ for (let i=0; i<300; i++) {
 
 let holdMaxPower = 0;
 let holdTopLeft = [];
-for (let i=0; i<300; i++) {
-  console.log('processing row (Y)', i+1);
-  for (let j=0; j<300; j++) {
-    for (let l=0; l<(300-(Math.max(i, j))); l++) {
-      let power = 0;
+for (let i=0; i<gridSize; i++) {
+  for (let j=0; j<gridSize; j++) {
+    
+    let prevPower = grid[i][j];
+    
+    for (let l=1; l<(gridSize-(Math.max(i, j))); l++) {
+      let power = prevPower;
+      
       for (let m=0; m<l; m++) {
-        for (let n=0; n<l; n++) {
-          power += grid[i+m][j+n];
-        }
+        power += (grid[i+m][j+l] + grid[i+l][j+m]);
       }
+      power += grid[i+l][j+l]; // catch the corner
+      
+      prevPower = power;
+      
       if (power > holdMaxPower) {
         holdMaxPower = power;
-        holdTopLeft = [j+1, i+1, l];
-        console.log('new max:', holdTopLeft, holdMaxPower);
+        holdTopLeft = [j+1, i+1, l+1];
+        // console.log('new max:', holdTopLeft, holdMaxPower);
       }
     }
   }

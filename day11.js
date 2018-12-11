@@ -20,15 +20,25 @@ for (let i=0; i<300; i++) {
 
 let holdMaxPower = 0;
 let holdTopLeft = [];
-for (let i=1; i<297; i++) {
-  for (let j=1; j<297; j++) {
-    let power = grid[i][j] + grid[i+1][j] + grid[i+2][j] + grid[i][j+1] + grid[i+1][j+1] + grid[i+2][j+1] + grid[i][j+2] + grid[i+1][j+2] + grid[i+2][j+2];
-    if (power > holdMaxPower) {
-      holdMaxPower = power;
-      holdTopLeft = [j+1, i+1];
+for (let i=0; i<300; i++) {
+  console.log('processing row (Y)', i+1);
+  for (let j=0; j<300; j++) {
+    for (let l=0; l<(300-(Math.max(i, j))); l++) {
+      let power = 0;
+      for (let m=0; m<l; m++) {
+        for (let n=0; n<l; n++) {
+          power += grid[i+m][j+n];
+        }
+      }
+      if (power > holdMaxPower) {
+        holdMaxPower = power;
+        holdTopLeft = [j+1, i+1, l];
+        console.log('new max:', holdTopLeft, holdMaxPower);
+      }
     }
   }
 }
 
 // console.log('122,79: ', grid[78][121]);
-console.log(holdTopLeft);
+// Serial 18 = 90,269,16
+console.log('winner winner chicken dinner:', holdTopLeft, holdMaxPower);

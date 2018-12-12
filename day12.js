@@ -1,7 +1,7 @@
 
 const real = 1;
 const data = require('./day12-data')[real].split(/\n/);
-const generations = 20;
+const generations = 50000000000;
 
 function main() {
   
@@ -30,9 +30,10 @@ function main() {
   // console.log(rules);
   // console.log(print(zeroPot));
 
-
+  let gardenPatterns = [];
+  
   for(let i=0; i<generations; i++) {
-    pot = zeroPot;
+    let pot = zeroPot;
     
     while (true) {
       pot.grow(i, rules);
@@ -53,7 +54,21 @@ function main() {
       }
     }
     
-    // console.log(print(zeroPot));
+    let garden = print(zeroPot);
+    garden = garden.substr(garden.indexOf('#'), garden.lastIndexOf('#')-garden.indexOf('#')+1);
+    gardenPatterns.push({ garden, first: firstPot(zeroPot)});
+    if (gardenPatterns.length > 20) {
+      gardenPatterns = gardenPatterns.slice(1);
+      let samesies = true;
+      for (let j=1; j<gardenPatterns.length; j++) {
+        if (gardenPatterns[j].garden !== gardenPatterns[0].garden) { samesies = false; }
+      }
+      if (samesies) {
+        console.log('pattern locked on generation', i - 20);
+        renumber(zeroPot, generations - i - 1);
+        break;
+      }
+    }
   }
   
   const total = score(zeroPot);
@@ -154,6 +169,63 @@ function score(zeroPot) {
   return garden.reduce(function(total, pot) {
     return total + pot;
   }, 0);
+}
+
+
+function firstPot(zeroPot) {
+  let pot = zeroPot;
+  let firstPot = 999999999;
+  
+  while (true) {
+    if (pot.currentState() === '#' && pot.number < firstPot) {
+      firstPot = pot.number;
+      break;
+    }
+    if (pot.left) {
+      pot = pot.left;
+    } else {
+      break;
+    }
+  }
+  pot = zeroPot.right;
+  
+  while (true) {
+    if (pot.currentState() === '#' && pot.number < firstPot) {
+      firstPot = pot.number;
+      break;
+    }
+    if (pot.right) {
+      pot = pot.right;
+    } else {
+      break;
+    }
+  }
+  
+  return firstPot;
+}
+
+
+function renumber(zeroPot, amount) {
+  let pot = zeroPot;
+  
+  while (true) {
+    pot.number += amount;
+    if (pot.left) {
+      pot = pot.left;
+    } else {
+      break;
+    }
+  }
+  pot = zeroPot.right;
+  
+  while (true) {
+    pot.number += amount;
+    if (pot.right) {
+      pot = pot.right;
+    } else {
+      break;
+    }
+  }
 }
 
 

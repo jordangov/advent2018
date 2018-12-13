@@ -65,10 +65,13 @@ while(true) {
         if (i < j) {
           carts.splice(j, 1);
           carts.splice(i, 1);
+          i--;
         } else {
           carts.splice(i, 1);
           carts.splice(j, 1);
+          i -= 2;
         }
+        break;
       }
     }
   }
@@ -85,6 +88,7 @@ while(true) {
 // 7,3
 // console.log('first collision is at:', collision);
 console.log('last cart:', carts);
+console.log('collisions', collisions.map((c) => [c.x, c.y]));
 
 
 function curve(cart, track) {

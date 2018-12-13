@@ -24,9 +24,9 @@ for (let i=0; i<data.length; i++) {
 // console.log(print());
 
 // iterate over carts for movement, detect collisions
-let collision = null;
+let collisions = [];
 let ticks = 0;
-while(!collision) {
+while(true) {
   ticks++
   carts.sort(function(a, b) {
     if (a.y !== b.y) {
@@ -61,23 +61,30 @@ while(!collision) {
       if (carts[j].id !== carts[i].id &&
           carts[j].x  === carts[i].x &&
           carts[j].y  === carts[i].y) {
-        collision = { x: carts[i].x, y: carts[i].y };
-        break;
+        collisions.push({ x: carts[i].x, y: carts[i].y, cartOne: carts[i], cartTwo: carts[j] });
+        if (i < j) {
+          carts.splice(j, 1);
+          carts.splice(i, 1);
+        } else {
+          carts.splice(i, 1);
+          carts.splice(j, 1);
+        }
       }
-    }
-    if (collision) {
-      break;
     }
   }
   
   // console.log(print());
-  if (ticks > 1500) {
+  // if (carts.length < 4) {
+  //   console.log(carts);
+  // }
+  if (carts.length < 2) {
     break;
   }
 }
 
 // 7,3
-console.log('first collision is at:', collision);
+// console.log('first collision is at:', collision);
+console.log('last cart:', carts);
 
 
 function curve(cart, track) {

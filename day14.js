@@ -1,6 +1,6 @@
 
-const input = 0;
-const recipeCount = Number(require('./day14-data')[input]);
+const input = 3;
+const recipeCount = require('./day14-data')[input];
 
 const recipes = [ 3, 7 ];
 const elves = [ 0, 1 ];
@@ -12,8 +12,12 @@ while (true) {
     return total + recipes[e];
   }, 0);
   
-  ('' + total).split('').forEach((d) => { recipes.push(Number(d)); });
-  if (recipes.length > (recipeCount + 10)) {
+  const additions = ('' + total).split('');
+  additions.forEach((d) => { recipes.push(Number(d)); });
+  
+  const latest = recipes.slice(recipes.length - 1 - additions.length - recipeCount.length).join('');
+  if (latest.indexOf(recipeCount) > -1) {
+    console.log('Matched at', recipes.length - 1 - additions.length - recipeCount.length + latest.indexOf(recipeCount));
     break;
   }
   

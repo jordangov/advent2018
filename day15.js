@@ -38,12 +38,12 @@ function main() {
         battleEnd(round);
       }
       if (target === null) {
-        console.log(`${units[i].type}${units[i].id} found no targets`);
+        // console.log(`${units[i].type}${units[i].id} found no targets`);
         continue;
       }
       
       if (!target.path.length) {
-        console.log(`${units[i].type}${units[i].id} attacking ${target.enemy.type}${target.enemy.id}`);
+        // console.log(`${units[i].type}${units[i].id} attacking ${target.enemy.type}${target.enemy.id}`);
         target.enemy.hp -= units[i].str;
         if (target.enemy.hp < 1) {
           console.log(`${target.enemy.type}${target.enemy.id} just died`);
@@ -51,15 +51,15 @@ function main() {
           i--;
         }
       } else {
-        console.log(`${units[i].type}${units[i].id} moving to ${target.path[0]}`);
+        // console.log(`${units[i].type}${units[i].id} moving to ${target.path[0]}`);
         units[i].move(target);
         // move and attack
         target = units[i].identifyTarget();
         if (inRange(units[i], target.enemy)) {
-          console.log(`${units[i].type}${units[i].id} attacking ${target.enemy.type}${target.enemy.id}`);
+          // console.log(`${units[i].type}${units[i].id} attacking ${target.enemy.type}${target.enemy.id}`);
           target.enemy.hp -= units[i].str;
           if (target.enemy.hp < 1) {
-            // console.log(`${target.enemy.type}${target.enemy.id} just died`);
+            console.log(`${target.enemy.type}${target.enemy.id} just died`);
             target.enemy.die();
             i--;
           }
@@ -68,7 +68,7 @@ function main() {
     }
     
     // console.log(units);
-    print(round);
+    // print(round);
     // if (round > 1) { console.log('tick break'); break; }
   }
 }
@@ -198,30 +198,46 @@ class Unit {
       const next = search.shift();
       visited.push([next.y, next.x].join(','));
       
+      // if (y === 19 && x === 8) {
+      //   console.log(`checking ${next.y},${next.x}`);
+      //   console.log(visited);
+      //   console.log(search.map((s) => { return s.y + ',' + s.x }));
+      //   for (let i=0; i<15000000; i++) { let o = new Object(); }
+      // }
+      
       // Did we find it?
       if (inRange(next, {x, y})) {
+        // console.log(`found path to ${next.y},${next.x}`);
         return next.path;
       }
       
+      function neverSeen(x, y) {
+        return visited.indexOf([y, x].join(',')) < 0 && !search.filter((s) => { return s.x === x && s.y === y; })[0];
+      }
+      
       // Add new searchable locations...
-      if (visited.indexOf([next.y-1, next.x].join(',')) < 0 && map[next.y-1] && map[next.y-1][next.x] === '.') {  // north
+      if (neverSeen(next.x, next.y-1) && map[next.y-1] && map[next.y-1][next.x] === '.') {  // north
         let path = next.path.slice();
         path.push([next.y-1, next.x]);
+        // console.log(`adding ${next.y-1},${next.x}`);
         search.push({ x: next.x, y: next.y-1, path });
       }
-      if (visited.indexOf([next.y, next.x+1].join(',')) < 0 && map[next.y][next.x+1] === '.') {  // east
+      if (neverSeen(next.x+1, next.y) && map[next.y][next.x+1] === '.') {  // east
         let path = next.path.slice();
         path.push([next.y, next.x+1]);
+        // console.log(`adding ${next.y},${next.x+1}`);
         search.push({ x: next.x+1, y: next.y, path });
       }
-      if (visited.indexOf([next.y+1, next.x].join(',')) < 0 && map[next.y+1] && map[next.y+1][next.x] === '.') {  // south
+      if (neverSeen(next.x, next.y+1) && map[next.y+1] && map[next.y+1][next.x] === '.') {  // south
         let path = next.path.slice();
         path.push([next.y+1, next.x]);
+        // console.log(`adding ${next.y+1},${next.x}`);
         search.push({ x: next.x, y: next.y+1, path });
       }
-      if (visited.indexOf([next.y, next.x-1].join(',')) < 0 && map[next.y][next.x-1] === '.') {  // west
+      if (neverSeen(next.x-1, next.y) && map[next.y][next.x-1] === '.') {  // west
         let path = next.path.slice();
         path.push([next.y, next.x-1])
+        // console.log(`adding ${next.y},${next.x-1}`);
         search.push({ x: next.x-1, y: next.y, path });
       }
     }

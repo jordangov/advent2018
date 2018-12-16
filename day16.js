@@ -5,34 +5,92 @@ const data = require('./day16-data')[input].split(/\n\n\n/);
 // const register = [3, 2, 1, 1];
 
 function main() {
-  const ops = data[0].split(/\n\n/).map((op) => {
+  const samples = data[0].split(/\n\n/).map((op) => {
     const pieces = op.split(/\n/);
     return  {
       before: eval(pieces[0].split(/: +/)[1]),
       op: pieces[1].split(' ').map((n) => { return Number(n); }),
       after: eval(pieces[2].split(/: +/)[1]),
-      matches: 0
+      matches: []
     }
   });
   
   // console.log(ops);
   
-  const threeOrMore = [];
-  ops.forEach((opset) => {
+  samples.forEach((opset) => {
     Object.keys(opcodes).forEach((code) => {
       const result = opcodes[code](opset.before, ...opset.op.slice(1));
       // console.log(code, result);
       if (result.join(' ') === opset.after.join(' ')) {
-        opset.matches++;
-        if (opset.matches === 3) {
-          threeOrMore.push(opset);
-        }
+        opset.matches.push(code);
       }
     });
     // console.log(opset);
   });
   
-  console.log('Ops with 3 or more matches:', threeOrMore.length);
+  let codes = [];
+  samples
+    .filter((opset) => { return opset.matches.length === 1; })
+    .forEach((opset) => {
+      codes[opset.op[0]] = opset.matches[0];
+    });
+  samples
+    .filter((opset) => { return opset.matches.length === 2 && opset.matches.indexOf('bori') > -1; })
+    .forEach((opset) => {
+      // console.log(opset.op[0], opset.matches);
+      let index = 0;
+      if (opset.matches[0] === 'bori') { index = 1; }
+      codes[opset.op[0]] = opset.matches[index];
+    });
+  samples
+    .filter((opset) => { return opset.matches.length === 2 && (opset.matches.indexOf('bori') > -1 || opset.matches.indexOf('muli') > -1); })
+    .forEach((opset) => {
+      let index = 0;
+      if (opset.matches[0] === 'bori') { index = 1; }
+      codes[opset.op[0]] = opset.matches[index];
+    });
+  console.log(codes);
+  
+  codes = [];
+  while (true) {
+    samples.forEach((opset) => {
+      let matchCount = 0;
+      let noMatch = null;
+      opset.matches.forEach((match) => {
+        if (codes.indexOf(match) > -1) {
+          matchCount++;
+        } else {
+          noMatch = match;
+        }
+      });
+      if (matchCount === opset.matches.length - 1) {
+        // console.log(opset.op[0], opset.matches);
+        codes[opset.op[0]] = noMatch;
+      }
+    });
+  
+    const count = codes.join(' ').split(/ +/).filter((c) => c.length).length;
+    if (count > 15) {
+      break;
+    }
+  }
+  console.log(codes);
+  
+  
+  // RUN THE TEST PROGRAM
+  
+  const ops = data[1].split(/\n/)
+    .map((op) => {
+      return op.split(' ').map((n) => { return Number(n); });
+    }).slice(1);
+  
+  let register = [0,0,0,0];
+  ops.forEach((op) => {
+    // console.log('running', op, codes[op[0]]);
+    register = opcodes[codes[op[0]]](register, ...op.slice(1));
+  });
+  
+  console.log('final register:', register);
 }
 
 const opcodes = {

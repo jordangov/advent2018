@@ -43,7 +43,7 @@ data.forEach((vein) => {
   }
 });
 
-print();
+// print();
 
 // Water flows...
 const verticals = [];
@@ -94,7 +94,8 @@ function goHorizontal(flowY, flowX) {
       break;
     } else if (map[flowY+1][x] !== '#' && map[flowY+1][x] !== '~') {
       if (verticals.indexOf([flowY, x+1].join(',')) < 0) {
-        for (let wx=x; wx<flowX; wx++) {
+        // console.log(`backfilling for new vertical at ${flowY}:`, x, flowX);
+        for (let wx=x; wx<flowX+1; wx++) {
           map[flowY][wx] = '~';
         }
         goVertical(flowY, x);
@@ -110,7 +111,7 @@ function goHorizontal(flowY, flowX) {
       break;  
     } else if (map[flowY+1][x] !== '#' && map[flowY+1][x] !== '~') {
       if (verticals.indexOf([flowY, x-1].join(',')) < 0) {
-        for (let wx=x; wx>flowX; wx--) {
+        for (let wx=x; wx>flowX-1; wx--) {
           map[flowY][wx] = '~';
         }
         goVertical(flowY, x);

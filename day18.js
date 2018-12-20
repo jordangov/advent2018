@@ -1,93 +1,155 @@
 
 const input = Number(process.argv[2]) || 0;
 const data = require('./day18-data')[input].split(/\n/);
-const minutes = 10;
+const minutes = 1000;
+let forest = [];
 
-let forest = data.map((row) => { return row.split(''); });
-
-print();
-
-for (let min=0; min<minutes; min++) {
-  const newForest = [];
-  for (let i=0; i<forest.length; i++) {
-    newForest.push([]);
-    for (let j=0; j<forest.length; j++) {
-      if (forest[i][j] === '.') {
-        newForest[i][j] = checkClearing(i, j);
-      } else if (forest[i][j] === '|') {
-        newForest[i][j] = checkTrees(i, j);
-      } else if (forest[i][j] === '#') {
-        newForest[i][j] = checkLumberyard(i, j);
+class Acre {
+  constructor(i, j, state) {
+    this.i = i;
+    this.j = j;
+    this.state = state;
+    this.previous = state;
+    this.before = [];
+    this.after = [];
+  }
+  
+  fill() {
+    for (let j=this.j-1; j<this.j+2; j++) {
+      if (forest[this.i-1] && forest[this.i-1][j]) {
+        this.before.push(forest[this.i-1][j]);
+      }
+      if (forest[this.i+1] && forest[this.i+1][j]) {
+        this.after.push(forest[this.i+1][j]);
       }
     }
+    if (forest[this.i] && forest[this.i][this.j-1]) {
+      this.before.push(forest[this.i][this.j-1]);
+    }
+    if (forest[this.i] && forest[this.i][this.j+1]) {
+      this.after.push(forest[this.i][this.j+1]);
+    }
   }
-  forest = newForest;
-  print();
+  
+  next() {
+    this.previous = this.state;
+    if (this.state === '.') {
+      this.state = this.checkClearing();
+    } else if (this.state === '|') {
+      this.state = this.checkWoods();
+    } else if (this.state === '#') {
+      this.state = this.checkYard();
+    }
+  }
+  
+  checkClearing() {
+    let count = 0;
+    for (let i=0; i<this.before.length; i++) {
+      if (this.before[i].previous === '|') {
+        count++;
+      }
+    }
+    for (let i=0; i<this.after.length; i++) {
+      if (this.after[i].state === '|') {
+        count++;
+      }
+    }
+    return (count > 2) ? '|' : '.';
+  }
+  
+  checkWoods() {
+    let count = 0;
+    for (let i=0; i<this.before.length; i++) {
+      if (this.before[i].previous === '#') {
+        count++;
+      }
+    }
+    for (let i=0; i<this.after.length; i++) {
+      if (this.after[i].state === '#') {
+        count++;
+      }
+    }
+    return (count > 2) ? '#' : '|';
+  }
+  
+  checkYard() {
+    let treeCount = 0;
+    let yardCount = 0;
+    for (let i=0; i<this.before.length; i++) {
+      if (this.before[i].previous === '|') {
+        treeCount++;
+      } else if (this.before[i].previous === '#') {
+        yardCount++;
+      }
+    }
+    for (let i=0; i<this.after.length; i++) {
+      if (this.after[i].state === '|') {
+        treeCount++;
+      } else if (this.after[i].state === '#') {
+        yardCount++;
+      }
+    }
+    return (treeCount > 0 && yardCount > 0) ? '#' : '.';
+  }
+  
 }
 
-// Scoring
-let yardCount = 0;
-let treeCount = 0;
+
+for (let i=0; i<data.length; i++) {
+  forest.push([]);
+  data[i].split('').forEach((acre, j) => {
+    forest[i][j] = new Acre(i, j, acre);
+  });
+}
 for (let i=0; i<forest.length; i++) {
-  for (let j=0; j<forest.length; j++) {
-    if (forest[i][j] === '|') {
-      treeCount++;
-    } else if (forest[i][j] === '#') {
-      yardCount++;
-    }
+  for (let j=0; j<forest[i].length; j++) {
+    forest[i][j].fill();
   }
 }
-console.log(`After ${minutes} minutes: ${treeCount} woods and ${yardCount} lumberyards for a score of ${treeCount * yardCount}`);
 
+// print();
 
-function checkClearing(row, col) {
-  let treeCount = 0;
-  for (let i=row-1; i<row+2; i++) {
-    for (let j=col-1; j<col+2; j++) {
-      if (i === row && j === col) { continue; }
-      if (forest[i] && forest[i][j] === '|') {
-        treeCount++;
-      }
+const scores = [];
+for (let min=0; min<minutes; min++) {
+  for (let i=0; i<forest.length; i++) {
+    for (let j=0; j<forest.length; j++) {
+      forest[i][j].next();
     }
   }
-  return (treeCount > 2) ? '|' : '.';
+  
+  const s = score();
+  if (scores.indexOf(s) > -1) {
+    console.log(`SCORE: ${s}... saw this score ${scores.length - scores.lastIndexOf(s)} minutes ago at index ${scores.lastIndexOf(s)}`);
+  }
+  scores.push(s);
+  
+  // print();
+  if (!(min % 100000)) {
+    console.log(`minute ${min}`);
+  }
 }
 
-function checkTrees(row, col) {
+function score() {
   let yardCount = 0;
-  for (let i=row-1; i<row+2; i++) {
-    for (let j=col-1; j<col+2; j++) {
-      if (i === row && j === col) { continue; }
-      if (forest[i] && forest[i][j] === '#') {
+  let treeCount = 0;
+  for (let i=0; i<forest.length; i++) {
+    for (let j=0; j<forest.length; j++) {
+      if (forest[i][j].state === '|') {
+        treeCount++;
+      } else if (forest[i][j].state === '#') {
         yardCount++;
       }
     }
   }
-  return (yardCount > 2) ? '#' : '|';
+  return treeCount * yardCount;
 }
 
-function checkLumberyard(row, col) {
-  // # => # if adjacent to 1+ # AND 1+ |
-  // # => . if not ^
-  let treeCount = 0;
-  let yardCount = 0;
-  for (let i=row-1; i<row+2; i++) {
-    for (let j=col-1; j<col+2; j++) {
-      if (i === row && j === col) { continue; }
-      if (forest[i] && forest[i][j] === '|') {
-        treeCount++;
-      } else if (forest[i] && forest[i][j] === '#') {
-        yardCount++;
-      }
-    }
-  }
-  return (treeCount > 0 && yardCount > 0) ? '#' : '.';
-}
+// console.log(`After ${minutes} minutes: ${treeCount} woods and ${yardCount} lumberyards for a score of ${treeCount * yardCount}`);
 
 
 function print() {
   console.log('<><><><><><><><><><><><><>');
   forest.forEach((row) => {
-    console.log(row.join(''));
+    console.log(row.map((a) => a.state).join(''));
   });
 }

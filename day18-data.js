@@ -13,6 +13,41 @@ module.exports = [
 |.||||..|.
 ...#.|..|.`,
 
+
+/*
+(1000000000-416)%28 = 24
+
+SCORE: 208658... saw this score 28 minutes ago at index 416
+SCORE: 212520... saw this score 28 minutes ago at index 417
+SCORE: 213395... saw this score 28 minutes ago at index 418
+SCORE: 216660... saw this score 28 minutes ago at index 419
+SCORE: 210368... saw this score 28 minutes ago at index 420
+SCORE: 203794... saw this score 28 minutes ago at index 421
+SCORE: 195510... saw this score 28 minutes ago at index 422
+SCORE: 180873... saw this score 28 minutes ago at index 423
+SCORE: 177126... saw this score 28 minutes ago at index 424
+SCORE: 176320... saw this score 28 minutes ago at index 425
+SCORE: 167862... saw this score 28 minutes ago at index 426
+SCORE: 169218... saw this score 28 minutes ago at index 427
+SCORE: 170428... saw this score 28 minutes ago at index 428
+SCORE: 172898... saw this score 28 minutes ago at index 429
+SCORE: 169470... saw this score 28 minutes ago at index 430
+SCORE: 165780... saw this score 28 minutes ago at index 431
+SCORE: 169260... saw this score 28 minutes ago at index 432
+SCORE: 169524... saw this score 28 minutes ago at index 433
+SCORE: 168935... saw this score 28 minutes ago at index 434
+SCORE: 173952... saw this score 28 minutes ago at index 435
+SCORE: 179622... saw this score 28 minutes ago at index 436
+SCORE: 180299... saw this score 28 minutes ago at index 437
+SCORE: 188155... saw this score 28 minutes ago at index 438
+SCORE: 195776... saw this score 28 minutes ago at index 439
+SCORE: 192198... saw this score 28 minutes ago at index 440
+SCORE: 199076... saw this score 28 minutes ago at index 441
+SCORE: 206375... saw this score 28 minutes ago at index 442
+SCORE: 210576... saw this score 28 minutes ago at index 443
+SCORE: 208658... saw this score 28 minutes ago at index 444
+ */
+
 `...#...#|....#.|..#..||....|#.#|...|...||.##......
 |.#...#......##|..|..#...|.|.....|.||.|##....#||.|
 ........|#.....|....|....#|...#...|.....|.|.|.|||.

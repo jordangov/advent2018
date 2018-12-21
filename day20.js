@@ -48,12 +48,16 @@ while (pieces.length) {
 
 // console.log(rooms);
 let holdMaxDoors = 0;
+let moreThan1K = 0;
 Object.keys(rooms).forEach((room) => {
   if (rooms[room] > holdMaxDoors) {
     holdMaxDoors = rooms[room];
   }
+  if (rooms[room] > 999) {
+    moreThan1K++;
+  }
 });
-console.log(`Furthest room is ${holdMaxDoors} away.`);
+console.log(`${Object.keys(rooms).length} rooms. Furthest room is ${holdMaxDoors} away, there are ${moreThan1K} rooms at least 1000 doors away.`);
 
 
 function followBranch() {
@@ -73,6 +77,8 @@ function followPath(path) {
     distance++;
     
     if (!rooms[location.join(',')]) {
+      rooms[location.join(',')] = distance;
+    } else if (rooms[location.join(',')] > distance) {
       rooms[location.join(',')] = distance;
     }
   });

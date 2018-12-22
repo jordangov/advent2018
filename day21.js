@@ -2,28 +2,29 @@
 const input = Number(process.argv[2]) || 0;
 const data = require('./day21-data')[input].split(/\n/);
 
-function main() {
+let boundTo = 0;
+const instructions = [];
+data.forEach((instruct, i) => {
+  if (i === 0) {
+    boundTo = Number(instruct.split(/ /)[1]);
+  } else {
+    instruction = instruct.split(/ /).map((n, i) => { return (i>0) ? Number(n) : n; });
+    instructions.push(instruction);
+  }
+});
 
-  let boundTo = 0;
-  const instructions = [];
-  data.forEach((instruct, i) => {
-    if (i === 0) {
-      boundTo = Number(instruct.split(/ /)[1]);
-    } else {
-      instruction = instruct.split(/ /).map((n, i) => { return (i>0) ? Number(n) : n; });
-      instructions.push(instruction);
-    }
-  });
-
+let holdCount = 0;
+function main(regZero) {
   let ip = 0;
-  let register = [10780777,0,0,0,0,0];
+  let register = [regZero,0,0,0,0,0];
   let instructionCount = 0;
   while(true) {
     register[boundTo] = ip;
     
     let tick = `ip=${ip} [${register}] ${instructions[ip].join(' ')}`;
-    if (ip === 28) {
-      console.log(`register 2 is ${register[2]}`);
+    if (ip === 28 && regZero === 0 && regZero !== register[2]) {
+      // console.log(`register 2 is ${register[2]}, running program with new regZero`);
+      main(register[2]);
     }
     register = opcodes[instructions[ip][0]](register, ...instructions[ip].slice(1));
     instructionCount++;
@@ -38,7 +39,12 @@ function main() {
       break;
     }
   }
-  console.log(`Program Ended after ${instructionCount} instructions`);
+  console.log(`Program Ended after ${instructionCount} instructions using ${regZero}.`);
+  if (instructionCount > holdCount) {
+    holdCount = instructionCount;
+  } else {
+    process.exit();
+  }
 }
 
 const opcodes = {
@@ -144,4 +150,4 @@ const opcodes = {
   }
 };
 
-main();
+main(0);

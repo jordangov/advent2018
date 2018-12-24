@@ -1,21 +1,27 @@
 
 const input = Number(process.argv[2]) || 0;
 const data = require('./day24-data')[input].split(/\n*(?:Infection|Immune System):\n/).slice(1);
-
-let immuneId = 0;
-let infectId = 0;
 const infoRE = /^(\d+) units each with (\d+) hit points (\([a-z ;,]+\) )?with an attack that does (\d+) ([a-z]+) damage at initiative (\d+)$/;
 
-const immune = [];
-const infection = [];
-data[0].split(/\n/).forEach((sentence) => {
-  immune.push(getGroup(sentence));
-  immune[immune.length-1].id = 'imm' + ++immuneId;
-});
-data[1].split(/\n/).forEach((sentence) => {
-  infection.push(getGroup(sentence));
-  infection[infection.length-1].id = 'inf' + ++infectId;
-});
+let immune = null;
+let infection = null;
+
+function parseInput() {
+  immune = [];
+  infection = [];
+  
+  let immuneId = 0;
+  let infectId = 0;
+  
+  data[0].split(/\n/).forEach((sentence) => {
+    immune.push(getGroup(sentence));
+    immune[immune.length-1].id = 'imm' + ++immuneId;
+  });
+  data[1].split(/\n/).forEach((sentence) => {
+    infection.push(getGroup(sentence));
+    infection[infection.length-1].id = 'inf' + ++infectId;
+  });
+}
 
 function getGroup(sentence) {
   const info = sentence.match(infoRE);
@@ -83,16 +89,16 @@ function targetingDecision(group, enemies, allies) {
 
 function doTargeting() {
   immune.sort(targetingSort);
-  console.log(`IMMUNE TARGETING`);
+  // console.log(`IMMUNE TARGETING`);
   immune.forEach((group) => {
     group.target = targetingDecision(group, infection, immune);
-    console.log(`TARGET ACQUIRED: group ${group.id} is targeting enemy ${(group.target) ? group.target.id : 'nobody'}`);
+    // console.log(`TARGET ACQUIRED: group ${group.id} is targeting enemy ${(group.target) ? group.target.id : 'nobody'}`);
   });
-  console.log(`INFECTION TARGETING`);
+  // console.log(`INFECTION TARGETING`);
   infection.sort(targetingSort);
   infection.forEach((group) => {
     group.target = targetingDecision(group, immune, infection);
-    console.log(`TARGET ACQUIRED: group ${group.id} is targeting enemy ${(group.target) ? group.target.id : 'nobody'}`);
+    // console.log(`TARGET ACQUIRED: group ${group.id} is targeting enemy ${(group.target) ? group.target.id : 'nobody'}`);
   });
 }
 
@@ -116,7 +122,7 @@ function doAttack() {
     if (!group.target) { return; }
     const dmg = getDamage(group, group.target);
     const death = Math.floor(dmg / group.target.hp);
-    console.log(`group ${group.id} killed ${death} units of enemy ${group.target.id}`);
+    // console.log(`group ${group.id} killed ${death} units of enemy ${group.target.id}`);
     group.target.count -= death;
     group.target.count = Math.max(0, group.target.count);
     group.target = null;
@@ -124,21 +130,49 @@ function doAttack() {
 }
 
 
-while(true) {
-  immune.forEach((g) => { console.log(`immune group ${g.id} has ${g.count} units`); });
-  infection.forEach((g) => { console.log(`infection group ${g.id} has ${g.count} units`); });
+let boost = 1000;
+let scale = 100;
+let down = true;
+while (true) {
+  parseInput();
+  if (down) { boost -= scale; } else { boost +=scale; }
   
-  doTargeting();
-  doAttack();
+  // between 83 and 87 the fight stalemates... and sure, I *could* code for that... or do this.
+  if (boost === 83) { boost += 5; }
   
-  if (!immune.filter((group) => { return group.count; }).length) {
-    const remain = infection.reduce((t, g) => { return g.count + t; }, 0);
-    console.log(`Immune system lost! Infection has ${remain} units left`);
-    break;
+  immune.forEach((g) => { g.dmgAmt += boost; });
+  
+  let winner = null;
+  while (true) {
+    if (boost === 83) {
+      immune.forEach((g) => { console.log(`immune group ${g.id} has ${g.count} units`); });
+      infection.forEach((g) => { console.log(`infection group ${g.id} has ${g.count} units`); });
+    }
+    
+    doTargeting();
+    doAttack();
+    
+    if (!immune.filter((group) => { return group.count; }).length) {
+      const remain = infection.reduce((t, g) => { return g.count + t; }, 0);
+      console.log(`Immune system lost! Infection has ${remain} units left`);
+      winner = 'infection';
+      break;
+    }
+    if (!infection.filter((group) => { return group.count; }).length) {
+      const remain = immune.reduce((t, g) => { return g.count + t; }, 0);
+      console.log(`Infection lost! Immune System has ${remain} units left`);
+      winner = 'immune';
+      break;
+    }
   }
-  if (!infection.filter((group) => { return group.count; }).length) {
-    const remain = immune.reduce((t, g) => { return g.count + t; }, 0);
-    console.log(`Infection lost! Immune System has ${remain} units left`);
+  
+  if (winner === 'infection') {
+    down = false;
+    scale = 1;
+  }
+  
+  if (winner === 'immune' && scale === 1) {
+    console.log('FOUND IT!');
     break;
   }
 }
